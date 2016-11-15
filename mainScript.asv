@@ -1,4 +1,3 @@
-
 obj=VideoReader('video.mp4');
 result=getFrame(40,obj);
 figure, imshow(result);
