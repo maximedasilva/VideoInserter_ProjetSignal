@@ -23,5 +23,9 @@ Vectmaha=[lineR;lineV;lineB];
 W= invCov * Vectmaha;
 DistMaha= Vectmaha .* W;
 
+DistMaha = sum(DistMaha,1);
+
+%On recrée l'image avec les distances
+DistMaha= reshape( DistMaha, [size(img,1),size(img,2)]);
 end
 
