@@ -8,12 +8,9 @@ imgV=double(img(:,:,2));
 imgB=double(img(:,:,3));
 
 %creation de la matrice des xi- moyenne , avec tous les pixels d'un coup
-TransImgR=imgR';
-TransImgV=imgV';
-TransImgB=imgB';
-lineR=reshape(TransImgR,1,numel(TransImgR));
-lineV=reshape(TransImgV,1,numel(TransImgV));
-lineB=reshape(TransImgB,1,numel(TransImgB));
+lineR=reshape(imgR,1,numel(imgR));
+lineV=reshape(imgV,1,numel(imgV));
+lineB=reshape(imgB,1,numel(imgB));
 lineR=lineR-moy(1);
 lineV=lineV-moy(2);
 lineB=lineB-moy(3);
