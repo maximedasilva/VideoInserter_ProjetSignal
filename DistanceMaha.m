@@ -1,4 +1,4 @@
-function [Vectmaha] = DistanceMaha( img,moy,matCov )
+function [DistMaha] = DistanceMaha( img,moy,matCov )
 %DISTANCEMAHA Summary of this function goes here
 %   Detailed explanation goes here
 
@@ -19,10 +19,9 @@ lineV=lineV-moy(2);
 lineB=lineB-moy(3);
 Vectmaha=[lineR;lineV;lineB];
 
-Vectmaha= invCov * Vectmaha;
-%pas fini
 
-
+W= invCov * Vectmaha;
+DistMaha= Vectmaha .* W;
 
 end
 

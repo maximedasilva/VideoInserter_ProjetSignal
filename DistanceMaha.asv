@@ -1,11 +1,11 @@
-function [Vectmaha] = DistanceMaha( img,moy,matCov )
+function [DistMaha] = DistanceMaha( img,moy,matCov )
 %DISTANCEMAHA Summary of this function goes here
 %   Detailed explanation goes here
 
 invCov=inv(matCov);
-imgR=img(:,:,1);
-imgV=img(:,:,2);
-imgB=img(:,:,3);
+imgR=double(img(:,:,1));
+imgV=double(img(:,:,2));
+imgB=double(img(:,:,3));
 
 %creation de la matrice des xi- moyenne , avec tous les pixels d'un coup
 TransImgR=imgR';
@@ -14,13 +14,14 @@ TransImgB=imgB';
 lineR=reshape(TransImgR,1,numel(TransImgR));
 lineV=reshape(TransImgV,1,numel(TransImgV));
 lineB=reshape(TransImgB,1,numel(TransImgB));
-lineR=Double(lineR)-moy(1);
+lineR=lineR-moy(1);
 lineV=lineV-moy(2);
 lineB=lineB-moy(3);
-finalMatrix=[lineR;lineV;lineB];
-VectMaha=
+Vectmaha=[lineR;lineV;lineB];
 
 
+W= invCov * Vectmaha;
+DistMaha= Vectmaha .* W;
 
 end
 
