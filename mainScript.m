@@ -1,6 +1,5 @@
-
 obj=VideoReader('video.mp4');
-result=getFrame(40,obj);
+result=getFrame(01,obj);
 figure, imshow(result);
 interest=InterestRegion(result);
 figure, imshow(interest)
@@ -10,8 +9,3 @@ distancemaha=DistanceMaha(result,moy,cov);
 seuil=330;
 binary=seuillage(distancemaha,seuil);
 binary=postTraitement(binary);
-
-
-
-
-    
