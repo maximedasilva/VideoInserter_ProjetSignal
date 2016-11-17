@@ -11,7 +11,7 @@ seuil=330;
 binary=seuillage(distancemaha,seuil);
 binary=postTraitement(binary);
 MatBary=barycentre(binary);
-
+test=0;
 
 
 
