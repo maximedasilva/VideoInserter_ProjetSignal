@@ -4,9 +4,6 @@ function [ Im ] = postTraitement( binary )
 se=strel('disk',5);
 Im= imerode(binary, se);
 Im=imdilate(Im,se);
-Im=bwlabel(Im);
-figure
-imagesc(Im),colorbar
-
+Im=Im.*255;
 end
 
