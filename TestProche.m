@@ -13,6 +13,7 @@ for i=1:4
             ordonneActuel(2,i)=actual(2,i);
         end
     end
+
 end
 end
 
