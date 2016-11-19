@@ -10,6 +10,6 @@ function [ matBary ] = barycentre( img )
     matBary(1,i) = mean(double(x));
     matBary(2,i) = mean(double(y));
 end
-
+test=0;
 end
 

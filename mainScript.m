@@ -1,5 +1,4 @@
-
-obj=VideoReader('video.mp4');
+obj=VideoReader('video.avi');
 result=getFrame(01,obj);
 figure, imshow(result);
 interest=InterestRegion(result);
@@ -16,7 +15,6 @@ distancemaha=DistanceMaha(result,moy,cov);
 binary=seuillage(distancemaha,seuil);
 binary=postTraitement(binary);
 MatBary=barycentre(binary);
-<<<<<<< HEAD
 old=MatBary;
 writeVideo(videoFinale,binary);
 for i=2:obj.NumberOfFrames
@@ -28,9 +26,6 @@ for i=2:obj.NumberOfFrames
     writeVideo(videoFinale,binary);
     MatBary=barycentre(binary);
     BarycentresActuels=TestProche(old,MatBary);
-    old=BarycentresActuels
+    old=BarycentresActuels;
 end
-close(videoFinale)
-=======
-test=0;
->>>>>>> b1df4980283bb5ca65bea8ab01abc500f4ab9f52
+close(videoFinale);
