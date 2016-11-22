@@ -4,12 +4,11 @@ function [ matBary ] = barycentre( img )
 
     img=bwlabel(img);
 
-    matBary=zeros(2,4)
+    matBary=zeros(2,4);
    for i=1:4
     [y, x] = find(img == i);
     matBary(1,i) = mean(double(x));
     matBary(2,i) = mean(double(y));
-end
-test=0;
+   end
 end
 
