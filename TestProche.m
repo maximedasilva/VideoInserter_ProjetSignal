@@ -9,8 +9,7 @@ for i=1:4
     distance=(old(1,j)-actual(1,i))^2+(old(2,j)-actual(2,i))^2;
         if(distance<minimum)
             minimum=distance;
-            ordonneActuel(1,i)=actual(1,i);
-            ordonneActuel(2,i)=actual(2,i);
+            ordonneActuel(:,i)=actual(:,j);
         end
     end
 

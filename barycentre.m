@@ -6,7 +6,7 @@ function [ matBary ] = barycentre( img )
 
     matBary=zeros(2,4)
    for i=1:4
-    [x,y] = find(img == i);
+    [y, x] = find(img == i);
     matBary(1,i) = mean(double(x));
     matBary(2,i) = mean(double(y));
 end
