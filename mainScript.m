@@ -19,6 +19,7 @@ MatBary=barycentre(binary);
 old=MatBary;
 writeVideo(videoFinale,binary);
 newFrame=motif2frame(myimg,result,MatBary(2,:),MatBary(1,:),1,binary);
+
 for i=2:obj.NumberOfFrames
     result=getFrame(i,obj);
     distancemaha=DistanceMaha(result,moy,cov);
@@ -26,7 +27,7 @@ for i=2:obj.NumberOfFrames
     binary=seuillage(distancemaha,seuil);
     binary=postTraitement(binary);
     writeVideo(videoFinale,binary);
-newFrame=motif2frame(myimg,result,MatBary(2,:),MatBary(1,:),1/1.20,binary);
+    newFrame=motif2frame(myimg,result,MatBary(2,:),MatBary(1,:),1/1.20,binary);
     MatBary=barycentre(binary);
     BarycentresActuels=TestProche(old,MatBary);
     old=BarycentresActuels;
