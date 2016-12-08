@@ -4,7 +4,6 @@ function [ binary ] = binarisationMain( image,moy,cov )
 seuil=200;
 distancemaha=DistanceMaha(image,moy,cov);
 binary=seuillage(distancemaha,seuil);
-%binary=postTraitement(binary)
 imagesc(binary);
 
 end

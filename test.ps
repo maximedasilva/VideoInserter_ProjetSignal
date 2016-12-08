@@ -1,0 +1,1223 @@
+%!PS-Adobe-3.0
+%%Title: Covariance.m, DistanceMaha.m, InitMain.m, InterestRegion.m, TestProche.m, barycentre.m, binarisationMain.m, getFrame.m, mainScript.m, motif2frame.m
+%%For: maxime da silva
+%%Creator: a2ps version 4.14
+%%CreationDate: Sun Nov 27 21:56:12 2016
+%%BoundingBox: 24 24 571 818
+%%DocumentData: Clean7Bit
+%%Orientation: Landscape
+%%Pages: 13
+%%PageOrder: Ascend
+%%DocumentMedia: A4 595 842 0 () ()
+%%DocumentNeededResources: font Courier
+%%+ font Courier-Bold
+%%+ font Courier-BoldOblique
+%%+ font Courier-Oblique
+%%+ font Helvetica
+%%+ font Helvetica-Bold
+%%+ font Symbol
+%%+ font Times-Bold
+%%+ font Times-Roman
+%%DocumentProcessColors: Black 
+%%DocumentSuppliedResources: procset a2ps-a2ps-hdr
+%%+ procset a2ps-black+white-Prolog
+%%+ encoding ISO-8859-1Encoding
+%%EndComments
+/a2psdict 200 dict def
+a2psdict begin
+%%BeginProlog
+%%Copyright: (c) 1988, 89, 90, 91, 92, 93 Miguel Santana
+%%Copyright: (c) 1995, 96, 97, 98 Akim Demaille, Miguel Santana
+% Check PostScript language level.
+/languagelevel where {
+  pop /gs_languagelevel languagelevel def
+} {
+  /gs_languagelevel 1 def
+} ifelse
+
+% EPSF import as in the Red Book
+/BeginInclude {
+  /b4_Inc_state save def    		% Save state for cleanup
+  /dict_count countdictstack def	% Count objects on dict stack
+  /op_count count 1 sub def		% Count objects on operand stack 
+  userdict begin
+    0 setgray 0 setlinecap
+    1 setlinewidth 0 setlinejoin
+    10 setmiterlimit [ ] 0 setdash newpath
+    gs_languagelevel 1 ne {
+      false setstrokeadjust false setoverprint 
+    } if
+} bind def
+
+/EndInclude {
+  count op_count sub { pos } repeat	% Clean up stacks
+  countdictstack dict_count sub { end } repeat
+  b4_Inc_state restore
+} bind def
+
+/BeginEPSF {
+  BeginInclude
+  /showpage { } def
+} bind def
+
+/EndEPSF {
+  EndInclude
+} bind def
+
+% Page prefeed
+/page_prefeed {         % bool -> -
+  statusdict /prefeed known {
+    statusdict exch /prefeed exch put
+  } {
+    pop
+  } ifelse
+} bind def
+
+/deffont {
+  findfont exch scalefont def
+} bind def
+
+/reencode_font {
+  findfont reencode 2 copy definefont pop def
+} bind def
+
+% Function c-show (str => -)
+% centers text only according to x axis.
+/c-show { 
+  dup stringwidth pop
+  2 div neg 0 rmoveto
+  show
+} bind def
+
+% Function l-show (str => -)
+% prints texts so that it ends at currentpoint
+/l-show {
+  dup stringwidth pop neg 
+  0 
+  rmoveto show
+} bind def
+
+% center-fit show (str w => -)
+% show centered, and scale currentfont so that the width is less than w
+/cfshow {
+  exch dup stringwidth pop
+  % If the title is too big, try to make it smaller
+  3 2 roll 2 copy
+  gt
+  { % if, i.e. too big
+    exch div
+    currentfont exch scalefont setfont
+  } { % ifelse
+    pop pop 
+  }
+  ifelse
+  c-show			% center title
+} bind def
+
+% Return the y size of the current font
+% - => fontsize
+/currentfontsize {
+  currentfont /FontMatrix get 3 get 1000 mul
+} bind def
+
+% reencode the font
+% <encoding-vector> <fontdict> -> <newfontdict>
+/reencode { %def
+  dup length 5 add dict begin
+    { %forall
+      % <vector> <key> <val>
+      1 index /FID ne 
+      { def }{ pop pop } ifelse
+    } forall
+    /Encoding exch def % -
+
+    % Use the font's bounding box to determine the ascent, descent,
+    % and overall height; don't forget that these values have to be
+    % transformed using the font's matrix.
+    % We use `load' because sometimes BBox is executable, sometimes not.
+    % Since we need 4 numbers an not an array avoid BBox from being executed
+    /FontBBox load aload pop
+    FontMatrix transform /Ascent exch def pop
+    FontMatrix transform /Descent exch def pop
+    /FontHeight Ascent Descent sub def
+
+    % Get the underline position and thickness if they're defined.
+    % Use 1 if they are not defined.
+    currentdict /FontInfo 2 copy known
+    { get
+      /UnderlinePosition 2 copy % <FontInfo> /UP <FontInfo> /UP
+      2 copy known
+      { get }{ pop pop 1 } ifelse
+      0 exch FontMatrix transform exch pop
+      def % <FontInfo>
+
+      /UnderlineThickness 2 copy % <FontInfo> /UT <FontInfo> /UT
+      2 copy known
+      { get }{ pop pop 1 } ifelse
+      0 exch FontMatrix transform exch pop
+      def % <FontInfo>
+      pop % -
+    }{ pop pop
+    } ifelse
+
+    currentdict
+  end 
+} bind def
+
+% Function print line number (<string> # -)
+/# {
+  gsave
+    sx cw mul neg 2 div 0 rmoveto
+    f# setfont
+    c-show
+  grestore
+} bind def
+
+% -------- Some routines to enlight plain b/w printings ---------
+
+% Underline
+% width --
+/dounderline {
+  currentpoint
+  gsave
+    moveto
+    0 currentfont /Descent get currentfontsize mul rmoveto
+    0 rlineto
+    stroke
+  grestore
+} bind def
+
+% Underline a string
+% string --
+/dounderlinestring {
+  stringwidth pop
+  dounderline
+} bind def
+
+/UL {
+  /ul exch store
+} bind def
+
+% Draw a box of WIDTH wrt current font
+% width --
+/dobox {
+  currentpoint
+  gsave
+    newpath
+    moveto
+    0 currentfont /Descent get currentfontsize mul rmoveto
+    dup 0 rlineto
+    0 currentfont /FontHeight get currentfontsize mul rlineto
+    neg 0 rlineto
+    closepath
+    stroke
+  grestore
+} bind def
+
+/BX {
+  /bx exch store
+} bind def
+
+% Box a string
+% string --
+/doboxstring {
+  stringwidth pop
+  dobox
+} bind def
+
+%
+% ------------- Color routines ---------------
+%
+/FG /setrgbcolor load def
+
+% Draw the background
+% width --
+/dobackground {
+  currentpoint
+  gsave
+    newpath
+    moveto
+    0 currentfont /Descent get currentfontsize mul rmoveto
+    dup 0 rlineto
+    0 currentfont /FontHeight get currentfontsize mul rlineto
+    neg 0 rlineto
+    closepath
+    bgcolor aload pop setrgbcolor
+    fill
+  grestore
+} bind def
+
+% Draw bg for a string
+% string --
+/dobackgroundstring {
+  stringwidth pop
+  dobackground
+} bind def
+
+
+/BG {
+  dup /bg exch store
+  { mark 4 1 roll ] /bgcolor exch store } if
+} bind def
+
+
+/Show {
+  bg { dup dobackgroundstring } if
+  ul { dup dounderlinestring } if
+  bx { dup doboxstring } if
+  show
+} bind def
+
+% Function T(ab), jumps to the n-th tabulation in the current line
+/T {
+  cw mul x0 add
+  bg { dup currentpoint pop sub dobackground } if
+  ul { dup currentpoint pop sub dounderline } if
+  bx { dup currentpoint pop sub dobox } if
+  y0 moveto
+} bind def
+
+% Function n: move to the next line
+/n {
+  /y0 y0 bfs sub store
+  x0 y0 moveto
+} bind def
+
+% Function N: show and move to the next line
+/N {
+  Show
+  /y0 y0 bfs sub store
+  x0 y0 moveto
+} bind def
+
+/S {
+  Show
+} bind def
+
+%%BeginResource: procset a2ps-a2ps-hdr 2.0 2
+%%Copyright: (c) 1988, 89, 90, 91, 92, 93 Miguel Santana
+%%Copyright: (c) 1995, 96, 97, 98 Akim Demaille, Miguel Santana
+% Function title: prints page header.
+% <ct> <rt> <lt> are passed as argument
+/title { 
+  % 1. Draw the background
+  x v get y v get moveto
+  gsave
+    0 th 2 div neg rmoveto 
+    th setlinewidth
+    0.95 setgray
+    pw 0 rlineto stroke
+  grestore
+  % 2. Border it
+  gsave
+    0.7 setlinewidth
+    pw 0 rlineto
+    0 th neg rlineto
+    pw neg 0 rlineto
+    closepath stroke
+  grestore
+  % stk: ct rt lt
+  x v get y v get th sub 1 add moveto
+%%IncludeResource: font Helvetica
+  fHelvetica fnfs 0.8 mul scalefont setfont
+  % 3. The left title
+  gsave
+    dup stringwidth pop fnfs 0.8 mul add exch % leave space took on stack
+    fnfs 0.8 mul hm rmoveto
+    show			% left title
+  grestore
+  exch
+  % stk: ct ltw rt
+  % 4. the right title
+  gsave
+    dup stringwidth pop fnfs 0.8 mul add exch % leave space took on stack
+    dup
+    pw exch stringwidth pop fnfs 0.8 mul add sub
+    hm
+    rmoveto
+    show			% right title
+  grestore
+  % stk: ct ltw rtw
+  % 5. the center title
+  gsave
+    pw 3 1 roll
+    % stk: ct pw ltw rtw
+    3 copy 
+    % Move to the center of the left room
+    sub add 2 div hm rmoveto
+    % What is the available space in here?
+    add sub fnfs 0.8 mul sub fnfs 0.8 mul sub
+    % stk: ct space_left
+%%IncludeResource: font Helvetica-Bold
+  fHelvetica-Bold fnfs scalefont setfont
+    cfshow
+  grestore
+} bind def
+
+% Function border: prints virtual page border
+/border { %def
+  gsave				% print four sides
+    0 setgray
+    x v get y v get moveto
+    0.7 setlinewidth		% of the square
+    pw 0 rlineto
+    0 ph neg rlineto
+    pw neg 0 rlineto
+    closepath stroke
+  grestore
+} bind def
+
+% Function water: prints a water mark in background
+/water { %def
+  gsave
+    scx scy moveto rotate
+%%IncludeResource: font Times-Bold
+  fTimes-Bold 100 scalefont setfont
+    .97 setgray
+    dup stringwidth pop 2 div neg -50 rmoveto
+    show
+  grestore
+} bind def
+
+% Function rhead: prints the right header
+/rhead {  %def
+  lx ly moveto
+  fHelvetica fnfs 0.8 mul scalefont setfont
+  l-show
+} bind def
+
+% Function footer (cf rf lf -> -)
+/footer {
+  fHelvetica fnfs 0.8 mul scalefont setfont
+  dx dy moveto
+  show
+
+  snx sny moveto
+  l-show
+  
+  fnx fny moveto
+  c-show
+} bind def
+%%EndResource
+%%BeginResource: procset a2ps-black+white-Prolog 2.0 1
+
+% Function T(ab), jumps to the n-th tabulation in the current line
+/T { 
+  cw mul x0 add y0 moveto
+} bind def
+
+% Function n: move to the next line
+/n { %def
+  /y0 y0 bfs sub store
+  x0 y0 moveto
+} bind def
+
+% Function N: show and move to the next line
+/N {
+  Show
+  /y0 y0 bfs sub store
+  x0 y0 moveto
+}  bind def
+
+/S {
+  Show
+} bind def
+
+/p {
+  false UL
+  false BX
+  fCourier bfs scalefont setfont
+  Show
+} bind def
+
+/sy {
+  false UL
+  false BX
+  fSymbol bfs scalefont setfont
+  Show
+} bind def
+
+/k {
+  false UL
+  false BX
+  fCourier-Oblique bfs scalefont setfont
+  Show
+} bind def
+
+/K {
+  false UL
+  false BX
+  fCourier-Bold bfs scalefont setfont
+  Show
+} bind def
+
+/c {
+  false UL
+  false BX
+  fCourier-Oblique bfs scalefont setfont
+  Show
+} bind def
+
+/C {
+  false UL
+  false BX
+  fCourier-BoldOblique bfs scalefont setfont
+  Show 
+} bind def
+
+/l {
+  false UL
+  false BX
+  fHelvetica bfs scalefont setfont
+  Show
+} bind def
+
+/L {
+  false UL
+  false BX
+  fHelvetica-Bold bfs scalefont setfont
+  Show 
+} bind def
+
+/str{
+  false UL
+  false BX
+  fTimes-Roman bfs scalefont setfont
+  Show
+} bind def
+
+/e{
+  false UL
+  true BX
+  fHelvetica-Bold bfs scalefont setfont
+  Show
+} bind def
+
+%%EndResource
+%%EndProlog
+%%BeginSetup
+%%IncludeResource: font Courier
+%%IncludeResource: font Courier-Oblique
+%%IncludeResource: font Courier-Bold
+%%IncludeResource: font Times-Roman
+%%IncludeResource: font Symbol
+%%IncludeResource: font Courier-BoldOblique
+%%BeginResource: encoding ISO-8859-1Encoding
+/ISO-8859-1Encoding [
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef 
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef 
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef 
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef 
+/space /exclam /quotedbl /numbersign /dollar /percent /ampersand /quoteright 
+/parenleft /parenright /asterisk /plus /comma /minus /period /slash 
+/zero /one /two /three /four /five /six /seven 
+/eight /nine /colon /semicolon /less /equal /greater /question 
+/at /A /B /C /D /E /F /G 
+/H /I /J /K /L /M /N /O 
+/P /Q /R /S /T /U /V /W 
+/X /Y /Z /bracketleft /backslash /bracketright /asciicircum /underscore 
+/quoteleft /a /b /c /d /e /f /g 
+/h /i /j /k /l /m /n /o 
+/p /q /r /s /t /u /v /w 
+/x /y /z /braceleft /bar /braceright /asciitilde /.notdef 
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef 
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef 
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef 
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef 
+/space /exclamdown /cent /sterling /currency /yen /brokenbar /section 
+/dieresis /copyright /ordfeminine /guillemotleft /logicalnot /hyphen /registered /macron 
+/degree /plusminus /twosuperior /threesuperior /acute /mu /paragraph /bullet 
+/cedilla /onesuperior /ordmasculine /guillemotright /onequarter /onehalf /threequarters /questiondown 
+/Agrave /Aacute /Acircumflex /Atilde /Adieresis /Aring /AE /Ccedilla 
+/Egrave /Eacute /Ecircumflex /Edieresis /Igrave /Iacute /Icircumflex /Idieresis 
+/Eth /Ntilde /Ograve /Oacute /Ocircumflex /Otilde /Odieresis /multiply 
+/Oslash /Ugrave /Uacute /Ucircumflex /Udieresis /Yacute /Thorn /germandbls 
+/agrave /aacute /acircumflex /atilde /adieresis /aring /ae /ccedilla 
+/egrave /eacute /ecircumflex /edieresis /igrave /iacute /icircumflex /idieresis 
+/eth /ntilde /ograve /oacute /ocircumflex /otilde /odieresis /divide 
+/oslash /ugrave /uacute /ucircumflex /udieresis /yacute /thorn /ydieresis 
+] def
+%%EndResource
+% Initialize page description variables.
+/sh 595 def
+/sw 842 def
+/llx 24 def
+/urx 818 def
+/ury 571 def
+/lly 24 def
+/#copies 1 def
+/th 15.000000 def
+/fnfs 11 def
+/bfs 8.005733 def
+/cw 4.803440 def
+
+% Dictionary for ISO-8859-1 support
+/iso1dict 8 dict begin
+  /fCourier ISO-8859-1Encoding /Courier reencode_font
+  /fCourier-Bold ISO-8859-1Encoding /Courier-Bold reencode_font
+  /fCourier-BoldOblique ISO-8859-1Encoding /Courier-BoldOblique reencode_font
+  /fCourier-Oblique ISO-8859-1Encoding /Courier-Oblique reencode_font
+  /fHelvetica ISO-8859-1Encoding /Helvetica reencode_font
+  /fHelvetica-Bold ISO-8859-1Encoding /Helvetica-Bold reencode_font
+  /fTimes-Bold ISO-8859-1Encoding /Times-Bold reencode_font
+  /fTimes-Roman ISO-8859-1Encoding /Times-Roman reencode_font
+currentdict end def
+/bgcolor [ 0 0 0 ] def
+/bg false def
+/ul false def
+/bx false def
+% The font for line numbering
+/f# /Helvetica findfont bfs .6 mul scalefont def
+/fSymbol /Symbol findfont def
+/hm fnfs 0.25 mul def
+/pw
+   cw 81.400000 mul
+def
+/ph
+   501.959430 th add
+def
+/pmw urx llx sub pw 2 mul sub 1 div def
+/pmh 0 def
+/v 0 def
+/x [
+  0
+  dup pmw add pw add
+] def
+/y [
+  pmh ph add 0 mul ph add
+  dup
+] def
+/scx sw 2 div def
+/scy sh 2 div def
+/snx urx def
+/sny lly 2 add def
+/dx llx def
+/dy sny def
+/fnx scx def
+/fny dy def
+/lx snx def
+/ly ury fnfs 0.8 mul sub def
+/sx 0 def
+/tab 8 def
+/x0 0 def
+/y0 0 def
+%%EndSetup
+
+%%Page: (1) 1
+%%BeginPageSetup
+/pagesave save def
+sh 0 translate 90 rotate
+%%EndPageSetup
+iso1dict begin
+gsave
+llx lly 12 add translate
+/v 0 store
+/x0 x v get 3.362408 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+(function) K
+( [ matCov ] = ) p
+(Covariance) L
+(\(moy,reg \)) p n
+(%COVARIENCE Summary of this function goes here) c n
+(%   Detailed explanation goes here) N
+(matCov=zeros\(3:3\);) p n
+(for) K
+( c=1:3) p n
+(    ) S
+(for) K
+( c2=1:3) p n
+(        test=mean\(reg\(:,:,c\)\);) N
+(        ) S
+(%matCov\(c,c2\)=mean\(mean\(mean\(\(\(reg\(:,:,c\)\)\)\)\)-moy\(c\)* mean\(mean\(reg\(:,:,) c n
+(c2\)\)\)-moy\(c2\)\);) N
+(        matCov\(c,c2\)=mean\(mean\(\(reg\(:,:,c\)-moy\(c\)\).*\(reg\(:,:,c2\)-moy\(c2\)\)\)\)) p n
+(        moy\(c\)) N
+(    ) S
+(end) K n
+(end) N
+() p n
+() N
+() N
+() N
+() N
+() N
+() N
+() N
+() N
+(R1=reg\(:,:,1\);) N
+(R2=R1\(:\);) N
+(G1=reg\(:,:,2\);) N
+(G2=G1\(:\);) N
+(B1=reg\(:,:,3\);) N
+(B2=B1\(:\);) N
+(%Calcul de la covariance ) c n
+(%sigma11=\(sum\(\(R2-moy\(1\)\).*\(R2-moy\(1\)\)\)\)/N;) N
+(%sigma12=\(sum\(\(R2-moy\(1\)\).*\(G2-moy\(2\)\)\)\)/N;) N
+(%sigma13=\(sum\(\(R2-moy\(1\)\).*\(B2-moy\(3\)\)\)\)/N;) N
+(%sigma21=sigma12;) N
+(%sigma22=\(sum\(\(G2-moy\(2\)\).*\(G2-moy\(2\)\)\)\)/N;) N
+(%sigma23=\(sum\(\(G2-moy\(2\)\).*\(B2-moy\(3\)\)\)\)/N;) N
+(%sigma31=sigma13;) N
+(%sigma32=sigma23;) N
+(%sigma33=\(sum\(\(B2-moy\(3\)\).*\(B2-moy\(3\)\)\)\)/N;) N
+() p n
+(% On cr\351e la matrice des covariances) c n
+(%[sigma11 sigma12 sigma13;sigma21 sigma22 sigma23;sigma31 sigma32 sigma33];) N
+() p n
+(end) K n
+() p n
+(Covariance.m) (Page 1/1) (nov 08, 16 14:16) title
+border
+grestore
+(Printed by maxime da silva) rhead
+(Covariance.m) (1/13) (Dimanche novembre 27, 2016) footer
+end % of iso1dict
+pagesave restore
+showpage
+%%Page: (1) 2
+%%BeginPageSetup
+/pagesave save def
+sh 0 translate 90 rotate
+%%EndPageSetup
+iso1dict begin
+gsave
+llx lly 12 add translate
+/v 0 store
+/x0 x v get 3.362408 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+(function) K
+( [DistMaha] = ) p
+(DistanceMaha) L
+(\( img,moy,matCov \)) p n
+(%DISTANCEMAHA Summary of this function goes here) c n
+(%   Detailed explanation goes here) N
+() p n
+(invCov=inv\(matCov\);) N
+(imgR=double\(img\(:,:,1\)\);) N
+(imgV=double\(img\(:,:,2\)\);) N
+(imgB=double\(img\(:,:,3\)\);) N
+() N
+(%creation de la matrice des xi- moyenne , avec tous les pixels d'un coup) c n
+(lineR=reshape\(imgR,1,numel\(imgR\)\);) p n
+(lineV=reshape\(imgV,1,numel\(imgV\)\);) N
+(lineB=reshape\(imgB,1,numel\(imgB\)\);) N
+(lineR=lineR-moy\(1\);) N
+(lineV=lineV-moy\(2\);) N
+(lineB=lineB-moy\(3\);) N
+(Vectmaha=[lineR;lineV;lineB];) N
+() N
+() N
+(W= invCov * Vectmaha;) N
+(DistMaha= Vectmaha .* W;) N
+() N
+(DistMaha = sum\(DistMaha,1\);) N
+() N
+(%On recr\351e l'image avec les distances) c n
+(DistMaha= reshape\( DistMaha, [size\(img,1\),size\(img,2\)]\);) p n
+(end) K n
+() p n
+(DistanceMaha.m) (Page 1/1) (nov 15, 16 11:45) title
+border
+grestore
+(Printed by maxime da silva) rhead
+(DistanceMaha.m) (2/13) (Dimanche novembre 27, 2016) footer
+end % of iso1dict
+pagesave restore
+showpage
+%%Page: (1) 3
+%%BeginPageSetup
+/pagesave save def
+sh 0 translate 90 rotate
+%%EndPageSetup
+iso1dict begin
+gsave
+llx lly 12 add translate
+/v 0 store
+/x0 x v get 3.362408 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+(function) K
+( [ moy,cov ] = ) p
+(InitMain) L
+(\( image \)) p n
+(%INITMAIN Summary of this function goes here) c n
+(interest=image\(123:147,283:290,:\);) p n
+(%interest=image\(min\(y\):max\(y\),min\(x\):max\(x\),:\);) c n
+(moy=moyenne\(interest\);) p n
+(cov=Covariance\(moy,interest\);) N
+(end) K n
+() p n
+(InitMain.m) (Page 1/1) (nov 27, 16 14:56) title
+border
+grestore
+(Printed by maxime da silva) rhead
+(InitMain.m) (3/13) (Dimanche novembre 27, 2016) footer
+end % of iso1dict
+pagesave restore
+showpage
+%%Page: (1) 4
+%%BeginPageSetup
+/pagesave save def
+sh 0 translate 90 rotate
+%%EndPageSetup
+iso1dict begin
+gsave
+llx lly 12 add translate
+/v 0 store
+/x0 x v get 3.362408 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+(function) K
+( [ region ] = ) p
+(InterestRegion) L
+(\( image \)) p n
+(%INTERESTREGION Summary of this function goes here) c n
+(%   Detailed explanation goes here) N
+(region=image\(143:153,185:194,1:3\);) p n
+() N
+(end) K n
+() p n
+(InterestRegion.m) (Page 1/1) (nov 26, 16 14:54) title
+border
+grestore
+(Printed by maxime da silva) rhead
+(InterestRegion.m) (4/13) (Dimanche novembre 27, 2016) footer
+end % of iso1dict
+pagesave restore
+showpage
+%%Page: (1) 5
+%%BeginPageSetup
+/pagesave save def
+sh 0 translate 90 rotate
+%%EndPageSetup
+iso1dict begin
+gsave
+llx lly 12 add translate
+/v 0 store
+/x0 x v get 3.362408 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+(function) K
+( [ordonneActuel ] = ) p
+(TestProche) L
+(\(old, actual \)) p n
+(%TESTPROCHE Summary of this function goes here) c n
+(%   Detailed explanation goes here) N
+() p n
+(ordonneActuel=zeros\(2,4\);) N
+(for) K
+( i=1:4) p n
+(    minimum=realmax;) N
+(    ) S
+(for) K
+( j=1:4) p n
+(    distance=\(actual\(1,j\)-old\(1,i\)\)^2+\(actual\(2,j\)-old\(2,i\)\)^2;) N
+(        ) S
+(if) K
+(\(distance<minimum\)) p n
+(            minimum=distance;) N
+(            ordonneActuel\(:,i\)=actual\(:,j\);) N
+(        ) S
+(end) K n
+(    ) p
+(end) K n
+() p n
+(end) K n
+(end) N
+() p n
+(TestProche.m) (Page 1/1) (nov 22, 16 14:10) title
+border
+grestore
+(Printed by maxime da silva) rhead
+(TestProche.m) (5/13) (Dimanche novembre 27, 2016) footer
+end % of iso1dict
+pagesave restore
+showpage
+%%Page: (1) 6
+%%BeginPageSetup
+/pagesave save def
+sh 0 translate 90 rotate
+%%EndPageSetup
+iso1dict begin
+gsave
+llx lly 12 add translate
+/v 0 store
+/x0 x v get 3.362408 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+(function) K
+( [ matBary ] = ) p
+(barycentre) L
+(\( img \)) p n
+(%BARYCENTRE Summary of this function goes here) c n
+(%   Detailed explanation goes here) N
+() p n
+(    img=bwlabel\(img\);) N
+() N
+(    matBary=zeros\(2,4\);) N
+(   ) S
+(for) K
+( i=1:4) p n
+(    [y, x] = find\(img == i\);) N
+(    matBary\(1,i\) = mean\(double\(x\)\);) N
+(    matBary\(2,i\) = mean\(double\(y\)\);) N
+(   ) S
+(end) K n
+(end) N
+() p n
+(barycentre.m) (Page 1/1) (nov 22, 16 13:48) title
+border
+grestore
+(Printed by maxime da silva) rhead
+(barycentre.m) (6/13) (Dimanche novembre 27, 2016) footer
+end % of iso1dict
+pagesave restore
+showpage
+%%Page: (1) 7
+%%BeginPageSetup
+/pagesave save def
+sh 0 translate 90 rotate
+%%EndPageSetup
+iso1dict begin
+gsave
+llx lly 12 add translate
+/v 0 store
+/x0 x v get 3.362408 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+(function) K
+( [ binary ] = ) p
+(binarisationMain) L
+(\( image,moy,cov \)) p n
+(%BINARISATIONMAIN Summary of this function goes here) c n
+(%   Detailed explanation goes here) N
+(seuil=200;) p n
+(distancemaha=DistanceMaha\(image,moy,cov\);) N
+(binary=seuillage\(distancemaha,seuil\);) N
+(%binary=postTraitement\(binary\)) c n
+(imagesc\(binary\);) p n
+() N
+(end) K n
+() p n
+(binarisationMain.m) (Page 1/1) (nov 27, 16 14:33) title
+border
+grestore
+(Printed by maxime da silva) rhead
+(binarisationMain.m) (7/13) (Dimanche novembre 27, 2016) footer
+end % of iso1dict
+pagesave restore
+showpage
+%%Page: (1) 8
+%%BeginPageSetup
+/pagesave save def
+sh 0 translate 90 rotate
+%%EndPageSetup
+iso1dict begin
+gsave
+llx lly 12 add translate
+/v 0 store
+/x0 x v get 3.362408 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+(function) K
+( [image ] = ) p
+(getFrame) L
+(\( i,obj \)) p n
+(%UNTITLED Summary of this function goes here) c n
+(%   Detailed explanation goes here) N
+() p n
+(image=obj.read\(i\);) N
+() N
+(end) K n
+() p n
+(getFrame.m) (Page 1/1) (nov 15, 16 22:14) title
+border
+grestore
+(Printed by maxime da silva) rhead
+(getFrame.m) (8/13) (Dimanche novembre 27, 2016) footer
+end % of iso1dict
+pagesave restore
+showpage
+%%Page: (1) 9
+%%BeginPageSetup
+/pagesave save def
+sh 0 translate 90 rotate
+%%EndPageSetup
+iso1dict begin
+gsave
+llx lly 12 add translate
+/v 0 store
+/x0 x v get 3.362408 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+(obj=VideoReader\(') p
+(video.avi) str
+('\);) p n
+(myVideo=VideoReader\(') S
+(InsideIn.avi) str
+('\);) p n
+(myImg=read\(myVideo,1\);) N
+(result=read\(obj,1\);) N
+(interest=InterestRegion\(result\);) N
+(moy=moyenne\(interest\);) N
+(cov=Covariance\(moy,interest\);) N
+(seuil=500;) N
+(videoFinale=VideoWriter\(') S
+(output.avi) str
+('\);) p n
+(open\(videoFinale\);) N
+(main=read\(obj,50\);) N
+([moyMain,CovMain]=InitMain\(main\);) N
+(%Premi\350re image) c n
+(distancemaha=DistanceMaha\(result,moy,cov\);) p n
+(binary=seuillage\(distancemaha,seuil\);) N
+(binary=postTraitement\(binary\);) N
+(MatBary=barycentre\(binary\);) N
+(imagesc\(binary\);) N
+(%Produit Vectoriel?) c n
+(%MatBary=MatBary\(:,[2 4 3 1]\);) N
+(MatBary=MatBary\(:,[1 2 4 3]\);) p n
+(old=MatBary;) N
+(MainBinaire=binarisationMain\(result,moyMain,CovMain\);) N
+(newFrame=motif2frame\(myImg,result,MatBary\(1,:\),MatBary\(2,:\),1/1.20,MainBinaire\);) N
+(writeVideo\(videoFinale,newFrame\);) N
+(j=2;) N
+() N
+(for) K
+( i=2:obj.NumberOfFrames) p n
+(    ) S
+(if) K
+(\(i<20\)) p n
+(        myImg=read\(myVideo,1\);) N
+(    ) S
+(else) K n
+(        myImg=read\(myVideo,i-19\);) p n
+(    ) S
+(end) K n
+(    result=getFrame\(i,obj\);) p n
+(    distancemaha=DistanceMaha\(result,moy,cov\);) N
+(    binary=seuillage\(distancemaha,seuil\);) N
+(    binary=postTraitement\(binary\);) N
+(    MainBinaire=binarisationMain\(result,moyMain,CovMain\);) N
+(    MatBary=barycentre\(binary\);) N
+(    BarycentresActuels=TestProche\(old,MatBary\);) N
+(    newFrame=motif2frame\(myImg,result,BarycentresActuels\(1,:\),BarycentresActuels) N
+(\(2,:\),1/1.20,MainBinaire\);) N
+(    writeVideo\(videoFinale,newFrame\);) N
+(    old=BarycentresActuels;) N
+(    j=j+1) N
+(end) K n
+(close\(videoFinale\);) p n
+(mainScript.m) (Page 1/1) (nov 27, 16 15:02) title
+border
+grestore
+(Printed by maxime da silva) rhead
+(mainScript.m) (9/13) (Dimanche novembre 27, 2016) footer
+end % of iso1dict
+pagesave restore
+showpage
+%%Page: (1) 10
+%%BeginPageSetup
+/pagesave save def
+sh 0 translate 90 rotate
+%%EndPageSetup
+iso1dict begin
+gsave
+llx lly 12 add translate
+/v 0 store
+/x0 x v get 3.362408 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+(function) K
+( frame=) p
+(motif2frame) L
+(\(motif,frame,x,y,scale,mask\)) p n
+(% motif : image 'source' \(couleur index\351e ou vraie couleur\)) c n
+(% frame : image 'destination' \(vraie couleur\)) N
+(% x,y   : coordonn\351es des 4 sommets de la 'source' dans la 'destination', vecteu) N
+(rs lignes) N
+(% scale : param\350tre d'\351chelle \(exemple : 1\)  ) N
+(% mask  : masque 'destination' des pixels \340 ne pas modifier, \(exemple : matrice ) N
+(de 0\)  ) N
+() p n
+([hIn,wIn,dIn]=size\(motif\);) N
+(xIn=[1 wIn wIn 1];) N
+(yIn=[1 1 hIn hIn];) N
+(xIn=wIn/2+scale*\(xIn-wIn/2\);) N
+(yIn=hIn/2+scale*\(yIn-hIn/2\);) N
+(tForm=cp2tform\([xIn' yIn'],[x' y'],') S
+(projective) str
+('\);) p n
+(motif=double\(motif\);) N
+(for) K
+( p=1:3) p n
+(    ) S
+(if) K
+( dIn == 1) p n
+(        [motifTransform,xData,yData]=imtransform\(motif\(:,:\),tForm,') S
+(Fill) str
+(',-1\);) p n
+(    ) S
+(else) K n
+(        [motifTransform,xData,yData]=imtransform\(motif\(:,:,p\),tForm,') p
+(Fill) str
+(',-1\);) p n
+(    ) S
+(end) K n
+(    [hOut,wOut]=size\(motifTransform\);) p n
+(    xOut=fix\(xData\(1\)\);) N
+(    yOut=fix\(yData\(1\)\);) N
+(    dxOut=xOut:xOut+wOut-1;) N
+(    dyOut=yOut:yOut+hOut-1;) N
+(    pos=find\(mask\(dyOut,dxOut\)==1\);) N
+(    ) S
+(if) K
+( \(length\(pos\)\)) p n
+(        motifTransform\(pos\)=-1;) N
+(    ) S
+(end) K n
+(    pos=find\(motifTransform~=-1\);) p n
+(    frameCut=frame\(dyOut,dxOut,p\);) N
+(    ) S
+(if) K
+( \(length\(pos\)\)) p n
+(        frameCut\(pos\)=uint8\(motifTransform\(pos\)\);) N
+(    ) S
+(end) K n
+(    frame\(dyOut,dxOut,p\)=frameCut;    ) p n
+(end) K n
+(end) S
+(motif2frame.m) (Page 1/1) (nov 22, 16 8:38) title
+border
+grestore
+(Printed by maxime da silva) rhead
+(motif2frame.m) (10/13) (Dimanche novembre 27, 2016) footer
+end % of iso1dict
+pagesave restore
+showpage
+%%Page: (1) 11
+%%BeginPageSetup
+/pagesave save def
+sh 0 translate 90 rotate
+%%EndPageSetup
+iso1dict begin
+gsave
+llx lly 12 add translate
+/v 0 store
+/x0 x v get 3.362408 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+(function) K
+( [ moy,N ] = ) p
+(moyenne) L
+(\( reg \)) p n
+(%MOYENNE Summary of this function goes here) c n
+(%   Detailed explanation goes here) N
+(moy=zeros\(3,1\);) p n
+(N=0;) N
+() N
+(        ) S
+(for) K
+( c=1:3) p n
+(            moy\(c\)=mean\(mean\(reg\(:,:,c\)\)\);) N
+(        ) S
+(end) K n
+(end) N
+() p n
+(moyenne.m) (Page 1/1) (nov 08, 16 14:16) title
+border
+grestore
+(Printed by maxime da silva) rhead
+(moyenne.m) (11/13) (Dimanche novembre 27, 2016) footer
+end % of iso1dict
+pagesave restore
+showpage
+%%Page: (1) 12
+%%BeginPageSetup
+/pagesave save def
+sh 0 translate 90 rotate
+%%EndPageSetup
+iso1dict begin
+gsave
+llx lly 12 add translate
+/v 0 store
+/x0 x v get 3.362408 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+(function) K
+( [ Im ] = ) p
+(postTraitement) L
+(\( binary \)) p n
+(%POSTTRAITEMENT Summary of this function goes here) c n
+(%   Detailed explanation goes here) N
+(se=strel\(') p
+(disk) str
+(',5\);) p n
+(Im= imerode\(binary, se\);) N
+(Im=imdilate\(Im,se\);) N
+(Im=Im.*255;) N
+() N
+(end) K n
+() p n
+(postTraitement.m) (Page 1/1) (nov 18, 16 19:46) title
+border
+grestore
+(Printed by maxime da silva) rhead
+(postTraitement.m) (12/13) (Dimanche novembre 27, 2016) footer
+end % of iso1dict
+pagesave restore
+showpage
+%%Page: (1) 13
+%%BeginPageSetup
+/pagesave save def
+sh 0 translate 90 rotate
+%%EndPageSetup
+iso1dict begin
+gsave
+llx lly 12 add translate
+/v 0 store
+/x0 x v get 3.362408 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+(function) K
+( [ imBinaire ] = ) p
+(seuillage) L
+(\( distMaha, seuil \)) p n
+(%SEUILLAGE Summary of this function goes here) c n
+(%   Detailed explanation goes here) N
+() p n
+(imBinaire=distMaha;) N
+(for) K
+( i=1:size\(distMaha,1\)) p n
+(    ) S
+(for) K
+( j=1:size\(distMaha,2\)) p n
+(        ) S
+(if) K
+( distMaha\(i,j\)<seuil) p n
+(            imBinaire\(i,j\)=1;) N
+(        ) S
+(else) K
+( imBinaire\(i,j\)=0;) p n
+(        ) S
+(end) K n
+(    ) p
+(end) K n
+(end) N
+(end) N
+() p n
+() N
+(seuillage.m) (Page 1/1) (nov 15, 16 11:45) title
+border
+grestore
+(Printed by maxime da silva) rhead
+(seuillage.m) (13/13) (Dimanche novembre 27, 2016) footer
+end % of iso1dict
+pagesave restore
+showpage
+
+%%Trailer
+end
+%%EOF
