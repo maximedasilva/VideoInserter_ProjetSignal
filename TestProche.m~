@@ -10,7 +10,7 @@ for i=1:4%pour chaque barycentres de l'image précédente
     %On fait la distance euclidienne entre les deux points
         if(distance<minimum)%Si le point est plus proche 
             minimum=distance;%on affecte le nouveau minimum
-            ordonneActuel(:,i)=actual(:,j);%Et on affecte la matrice ordonnée
+            ordonneActuel(:,i)=actual(:,j);%Et on affecte la matrice
         end
     end
 

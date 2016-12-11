@@ -1,5 +1,5 @@
 function [ region ] = InterestRegion( image )
-%INTERESTREGION Summary of this function goes here
+%Récupération de la zone d'intérêt de l'image
 %   Detailed explanation goes here
 region=image(143:153,185:194,1:3);
 

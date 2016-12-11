@@ -1,9 +1,10 @@
 function [ Im ] = postTraitement( binary )
-%POSTTRAITEMENT Summary of this function goes here
+%Postraitement, qui fait une dilatation et une érosion sur une image
+%donnée.
 %   Detailed explanation goes here
-se=strel('disk',5);
-Im= imerode(binary, se);
-Im=imdilate(Im,se);
+se=strel('disk',5);%Sélection de la forme 
+Im= imerode(binary, se);%Erosion 
+Im=imdilate(Im,se);%Dilatation
 Im=Im.*255;
 end
 

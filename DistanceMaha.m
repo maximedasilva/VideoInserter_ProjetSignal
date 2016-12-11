@@ -1,9 +1,10 @@
 function [DistMaha] = DistanceMaha( img,moy,matCov )
-%DISTANCEMAHA Summary of this function goes here
+%Fonction Distance de mahalanobis qui per permet avec d'avoir la distance
+%de mahanobis en tout point d'une image avec une moyenne et une covariance
 %   Detailed explanation goes here
 
-invCov=inv(matCov);
-imgR=double(img(:,:,1));
+invCov=inv(matCov);%On prend l'inverse
+imgR=double(img(:,:,1));%On affecte les 3 composantes
 imgV=double(img(:,:,2));
 imgB=double(img(:,:,3));
 
